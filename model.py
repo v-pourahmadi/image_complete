@@ -372,7 +372,7 @@ class DCGAN(object):
 
       #E
       batch_idxs = int(np.ceil(nImgs/self.batch_size))
-image_shape
+
       if config.maskType == 'random':
           fraction_masked = 0.5
           mask = np.ones(self.image_shape)
