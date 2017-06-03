@@ -8,7 +8,7 @@ floyd output -u ID
 
 
 %run 
-python Complete_my.py --Test_img ./TestData/celebA/ --Outdir ./OutData --dataset celebA --visualize True --maskType center --is_crop True --input_height=64 
+python Complete_my.py --Test_img ./TestData/celebA/ --Outdir ./OutData --dataset celebA --visualize True --maskType center --is_crop True --input_height=108 
 
 python main.py --dataset celebA --input_height=108 --is_crop True --visualize True --sample_dir ./samples/celebA
 

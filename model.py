@@ -372,7 +372,7 @@ class DCGAN(object):
 
       #E
       batch_idxs = int(np.ceil(nImgs/self.batch_size))
-
+image_shape
       if config.maskType == 'random':
           fraction_masked = 0.5
           mask = np.ones(self.image_shape)
@@ -400,8 +400,8 @@ class DCGAN(object):
           batchSz = u-l
           batch_files = TestImg_list[l:u]
           batch = [get_image(os.path.join(config.Test_imgs, batch_file),
-                    input_height=self.output_height,
-                    input_width=self.output_width,
+                    input_height=self.input_height,
+                    input_width=self.input_width,
                     resize_height=self.output_height,
                     resize_width=self.output_width,
                     is_crop=self.is_crop,
