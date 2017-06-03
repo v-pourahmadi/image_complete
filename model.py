@@ -163,7 +163,11 @@ class DCGAN(object):
     if config.dataset == 'mnist':
       data_X, data_y = self.load_mnist()
     elif config.dataset == 'celebA':
-      data = glob(os.path.join("..\..\..\..\Backups/img_align_celeba\img_align_celeba", self.input_fname_pattern))
+    #  data = glob(os.path.join("..\..\..\..\Backups/img_align_celeba\img_align_celeba", self.input_fname_pattern))
+      data = glob(os.path.join("/input/img_align_celeba", self.input_fname_pattern))
+    elif config.dataset == 'mydata':
+    #  data = glob(os.path.join("..\..\..\..\Backups/img_align_celeba\img_align_celeba", self.input_fname_pattern))
+      data = glob(os.path.join("/input/mydata", self.input_fname_pattern))
     else:
       data = glob(os.path.join("./data", config.dataset, self.input_fname_pattern))
     #np.random.shuffle(data)
@@ -181,7 +185,8 @@ class DCGAN(object):
       self.G_sum, self.d_loss_fake_sum, self.g_loss_sum])
     self.d_sum = merge_summary(
         [self.z_sum, self.d_sum, self.d_loss_real_sum, self.d_loss_sum])
-    self.writer = SummaryWriter("./logs", self.sess.graph)
+    self.writer = SummaryWriter("/output/logs", self.sess.graph)
+    #self.writer = SummaryWriter("/logs", self.sess.graph)
 
     sample_z = np.random.uniform(-1, 1, size=(self.sample_num , self.z_dim))
     
@@ -216,7 +221,12 @@ class DCGAN(object):
       if config.dataset == 'mnist':
         batch_idxs = min(len(data_X), config.train_size) // config.batch_size
       elif config.dataset == 'celebA':
-        data = glob(os.path.join("..\..\..\..\Backups/img_align_celeba\img_align_celeba", self.input_fname_pattern))
+        data = glob(os.path.join("/input/img_align_celeba", self.input_fname_pattern))
+      #  data = glob(os.path.join("..\..\..\..\Backups/img_align_celeba\img_align_celeba", self.input_fname_pattern))
+        batch_idxs = min(len(data), config.train_size) // config.batch_size
+      elif config.dataset == 'mydata':
+        data = glob(os.path.join("/input/mydata", self.input_fname_pattern))
+      #  data = glob(os.path.join("..\..\..\..\Backups/img_align_celeba\img_align_celeba", self.input_fname_pattern))
         batch_idxs = min(len(data), config.train_size) // config.batch_size
       else:      
         data = glob(os.path.join("./data", config.dataset, self.input_fname_pattern))
@@ -305,7 +315,7 @@ class DCGAN(object):
           % (epoch, idx, batch_idxs,
             time.time() - start_time, errD_fake+errD_real, errG))
 
-        if np.mod(counter, 100) == 1:
+        if np.mod(counter,500) == 1:
           if config.dataset == 'mnist':
             samples, d_loss, g_loss = self.sess.run(
               [self.sampler, self.d_loss, self.g_loss],
@@ -320,6 +330,7 @@ class DCGAN(object):
             print("[Sample] d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss)) 
           else:
             try:
+              print("i am now 1")
               samples, d_loss, g_loss = self.sess.run(
                 [self.sampler, self.d_loss, self.g_loss],
                 feed_dict={
@@ -327,14 +338,18 @@ class DCGAN(object):
                     self.inputs: sample_inputs,
                 },
               )
-              save_images(samples, [8, 8],
-                    './{}/train_{:02d}_{:04d}.png'.format(config.sample_dir, epoch, idx))
+              #print(config.sample_dir)
+              save_path = os.path.join(config.sample_dir, 'train_{:02d}_{:04d}.png'.format(epoch, idx))
+              #print(save_path)
+              save_images(samples, [8, 8],save_path)
               print("[Sample] d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss)) 
             except:
               print("one pic error!...")
 
-        if np.mod(counter, 300) == 1:
-          self.save(config.checkpoint_dir, counter)
+        if np.mod(counter, 500) == 1:
+          #self.save(config.checkpoint_dir, counter)
+          cloud_checkpoint_dir = os.path.join("/output/checkpoint", self.model_dir)
+          self.save(cloud_checkpoint_dir, counter)
 
   def complete(self, config):
 
@@ -422,7 +437,7 @@ class DCGAN(object):
               loss, g, G_imgs = self.sess.run(run, feed_dict=fd)
 
               v_prev = np.copy(v)
-              v = config.beta1*v - config.learning_rate*g[0]
+              v = config.beta1*v - config.Comp_learning_rate*g[0]
               zhats += -config.beta1 * v_prev + (1+config.beta1)*v
               #zhats += - config.learning_rate*g[0]
               zhats = np.clip(zhats, -1, 1)
@@ -647,8 +662,12 @@ class DCGAN(object):
     checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir)
 
     ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
+    print(checkpoint_dir)
+    print("===")
     if ckpt and ckpt.model_checkpoint_path:
       ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
+      print(ckpt_name)
+      print("===")
       self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
       counter = int(next(re.finditer("(\d+)(?!.*\d)",ckpt_name)).group(0))
       print(" [*] Success to read {}".format(ckpt_name))

@@ -1,8 +1,14 @@
+floyd logs -u ID
+
+floyd output -u ID
+---------------------------
+
+
 %run main.py --dataset celebA --input_height=108 --is_train --is_crop True --visualize True --sample_dir ./samples/Wlan_channel
 
 
 %run 
-python Complete_my.py --Test_img ./TestData/celebA/ --Outdir ./OutData --dataset celebA --visualize True --maskType center --is_crop True
+python Complete_my.py --Test_img ./TestData/celebA/ --Outdir ./OutData --dataset celebA --visualize True --maskType center --is_crop True --input_height=64 
 
 python main.py --dataset celebA --input_height=108 --is_crop True --visualize True --sample_dir ./samples/celebA
 
